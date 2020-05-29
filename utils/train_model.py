@@ -12,7 +12,7 @@
 # Dependencies
 import pandas as pd
 import pickle
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
 # Fetch training data and preprocess for modeling
 train = pd.read_csv('data/train_data.csv')
@@ -24,11 +24,11 @@ X_train = train[['Pickup Lat','Pickup Long',
                  'Destination Lat','Destination Long']]
 
 # Fit model
-lm_regression = LinearRegression(normalize=True)
+regressor = RandomForestRegressor(n_estimators = 100, random_state = 0)
 print ("Training Model...")
-lm_regression.fit(X_train, y_train)
+regressor.fit(X_train, y_train)
 
 # Pickle model for use within our API
-save_path = '../trained-models/sendy_simple_lm_regression.pkl'
+save_path = '../trained-models/regressor.pkl'
 print (f"Training completed. Saving model to: {save_path}")
-pickle.dump(lm_regression, open(save_path,'wb'))
+pickle.dump(regressor, open(save_path,'wb'))
