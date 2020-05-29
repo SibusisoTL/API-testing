@@ -21,10 +21,6 @@ train = pd.read_csv('data/Train.csv')
 riders = pd.read_csv('data/riders.csv')
 df = train.merge(riders, how='left', on='Rider Id')
 
-#Drop unnecessary columns
-df = df.drop('Vehicle Type', axis=1, inplace=True)
-df = df.drop('Precipitation in millimeters', axis=1, inplace=True)
-
 #Categorical variables
 df['User Id'] = pd.to_numeric(df['User Id'].str.split('User_Id_', n=1, expand = True)[1])
 df = pd.get_dummies(df, columns=['Personal or Business'], drop_first=True)
