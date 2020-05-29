@@ -12,7 +12,7 @@
 # Dependencies
 import pandas as pd
 import pickle
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 
 # Fetch training data and preprocess for modeling
 train = pd.read_csv('data/train_data.csv')
@@ -24,7 +24,7 @@ X_train = train[['Pickup Lat','Pickup Long',
                  'Destination Lat','Destination Long']]
 
 # Fit model
-regressor = RandomForestRegressor(n_estimators = 10)
+regressor = LinearRegression(normalize=True)
 print ("Training Model...")
 regressor.fit(X_train, y_train)
 
