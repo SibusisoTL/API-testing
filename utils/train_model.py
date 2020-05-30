@@ -175,7 +175,6 @@ Q1 = df['y_tf'].quantile(0.25)
 Q3 = df['y_tf'].quantile(0.75)
 IQR = Q3 - Q1
 df = df.drop(df[(df['y_tf'] < (Q1 - 1.5 * IQR)) | (df['y_tf'] > (Q3 + 1.5 * IQR))].index)
-df = df.drop('y_tf)', axis=1)
 
 model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)', 'pl', 'con', 'arr p', 'p',
                     'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos']
