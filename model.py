@@ -166,7 +166,7 @@ def _preprocess_data(data):
     df['pickup_geohash'] = geo_df['pickup_label']
     df['dest_geohash'] = geo_df['dest_label']
     print(df.columns)
-    model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'Personal or Business_Personal', 'Platform Type_2', 'Platform Type_3', 'Platform Type_4']
+    model_features = ['User Id', 'dest_geohash', 'pickup_geohash']
 
     df = df[model_features]
 
