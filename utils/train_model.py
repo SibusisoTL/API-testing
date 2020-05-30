@@ -135,7 +135,7 @@ ls = [col for col in df if col.startswith('time')]
 for i in range(len(ls)):
     df = df.drop(df[df[ls[i]] <= 0].index)
 
-model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)']
+model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)']
 
 y_train = df[['Time from Pickup to Arrival']]
 X_train = df[model_features]
