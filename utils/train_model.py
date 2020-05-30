@@ -144,8 +144,11 @@ df['p'] = df['Pickup - Time']. apply(lambda x: (x - pd.to_datetime('12:00:00 AM'
 
 #sin/cos transformation of time values
 ls = ['pl', 'con', 'arr p', 'p']
+ls_sin = ['pl_sin', 'con_sin', 'arr p_sin', 'p_sin']
+ls_cos = ['pl_cos', 'con_cos', 'arr p_cos', 'p_cos']
 for i in range(len(ls)):
-    df[ls[i]] = df[ls[i]].apply(lambda x: np.sin(x*(2.*np.pi/86400)))
+    df[ls_sin[i]] = df[ls[i]].apply(lambda x: np.sin(x*(2.*np.pi/86400)))
+    df[ls_cos[i]] = df[ls[i]].apply(lambda x: np.cos(x*(2.*np.pi/86400)))
 
 #sin/cos transform 'Weekday'
 df['weekday_sin'] = df['Pickup - Weekday (Mo = 1)'].apply(lambda x: np.sin(x*(2.*np.pi/7)))
@@ -176,8 +179,13 @@ Q3 = df['y_tf'].quantile(0.75)
 IQR = Q3 - Q1
 df = df.drop(df[(df['y_tf'] < (Q1 - 1.5 * IQR)) | (df['y_tf'] > (Q3 + 1.5 * IQR))].index)
 
+#Rank riders by weighted rating value and efficiency
+total = sum(riders['No_of_Ratings'])
+df['ranking'] = df['Average_Rating'] * df['No_of_Ratings'] / total
+df['deliveries_per_day'] = df['No_Of_Orders'] / df['Age']
+
 model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)', 'pl', 'con', 'arr p', 'p',
-                    'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos']
+                    'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos', 'ranking', 'deliveries_per_day', 'pl_sin', 'con_sin', 'arr p_sin', 'p_sin', 'pl_cos', 'con_cos', 'arr p_cos', 'p_cos']
 
 y_train = df[['Time from Pickup to Arrival']]
 X_train = df[model_features]
