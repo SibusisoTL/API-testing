@@ -59,6 +59,7 @@ def _preprocess_data(data):
     # receive marks for submitting this code in an unchanged state.
     # ---------------------------------------------------------------
     train = pd.read_csv('utils/data/Train.csv')
+    riders = pd.read_csv('utils/data/Riders.csv')
 
     #Categorical variables
     df['User Id'] = pd.to_numeric(df['User Id'].str.split('User_Id_', n=1, expand = True)[1])
