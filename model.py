@@ -64,7 +64,7 @@ def _preprocess_data(data):
     df['User Id'] = pd.to_numeric(df['User Id'].str.split('User_Id_', n=1, expand = True)[1])
     df = pd.get_dummies(df, columns=['Personal or Business'], drop_first=True)
     df = pd.get_dummies(df, columns=['Platform Type'], drop_first=True)
-
+    print(df.columns)
 
 
     ##############################################################################
@@ -165,7 +165,7 @@ def _preprocess_data(data):
     #Add to df
     df['pickup_geohash'] = geo_df['pickup_label']
     df['dest_geohash'] = geo_df['dest_label']
-
+    print(df.columns)
     model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'Personal or Business_Personal', 'Platform Type_2', 'Platform Type_3', 'Platform Type_4']
 
     df = df[model_features]
