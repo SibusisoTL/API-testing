@@ -13,6 +13,7 @@
 import numpy as np
 import pandas as pd
 import datetime
+from scipy.stats import boxcox
 import pickle
 from sklearn.linear_model import LinearRegression
 
@@ -153,6 +154,28 @@ df['weekday_cos'] = df['Pickup - Weekday (Mo = 1)'].apply(lambda x: np.cos(x*(2.
 #sin/cos transform 'Day of Month'
 df['day_month_sin'] = df['Pickup - Day of Month']. apply(lambda x: np.sin(x*(2.*np.pi/31)))
 df['day_month_cos'] = df['Pickup - Day of Month']. apply(lambda x: np.cos(x*(2.*np.pi/31)))
+
+#Evaluate shortest times for target value
+speed = df.loc[:, ['Time from Pickup to Arrival', 'Distance (KM)']]
+speed['speed (km/h)'] = 0
+for i in range(len(speed)):
+    speed.iloc[i, 2] = speed.iloc[i, 1] / (speed.iloc[i, 0] / 3600)
+
+df['speed (km/h)'] = speed['speed (km/h)']
+
+#Drop rows that have speeds in excess of 110 km/h (max legal driving speed between Uganda and Kenya)
+df = df.drop(df[df['speed (km/h)'] > 110].index)
+df = df.drop('speed (km/h)', axis=1)
+
+#Data shows many outliers to the right. Use boxcox transformation to adjust the y variable to a more normal distribution
+df['y_tf'] = boxcox(df['Time from Pickup to Arrival'])[0]
+
+#Remove outliers using the IQR.
+Q1 = df['y_tf'].quantile(0.25)
+Q3 = df['y_tf'].quantile(0.75)
+IQR = Q3 - Q1
+df = df.drop(df[(df['y_tf'] < (Q1 - 1.5 * IQR)) | (df['y_tf'] > (Q3 + 1.5 * IQR))].index)
+df = df.drop('y_tf)', axis=1)
 
 model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)', 'pl', 'con', 'arr p', 'p',
                     'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos']
