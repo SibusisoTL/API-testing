@@ -117,7 +117,7 @@ geo_df['dest_label'] = geo_df['dest'].apply(lambda i: geohash_dict[i] if i in ge
 df['pickup_geohash'] = geo_df['pickup_label']
 df['dest_geohash'] = geo_df['dest_label']
 
-model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'Personal or Business_Personal', 'Platform Type_2', 'Platform Type_3', 'Platform Type_4']
+model_features = ['User Id', 'dest_geohash', 'pickup_geohash']
 
 y_train = df[['Time from Pickup to Arrival']]
 X_train = df[model_features]
