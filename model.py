@@ -165,8 +165,24 @@ def _preprocess_data(data):
     #Add to df
     df['pickup_geohash'] = geo_df['pickup_label']
     df['dest_geohash'] = geo_df['dest_label']
-    print(df.columns)
-    model_features = ['User Id', 'dest_geohash', 'pickup_geohash']
+    
+    #Transform time columns into 24 hour format
+    df['Placement - Time'] = pd.to_datetime(df['Placement - Time'], format='%I:%M:%S %p')
+    df['Confirmation - Time'] = pd.to_datetime(df['Confirmation - Time'], format='%I:%M:%S %p')
+    df['Arrival at Pickup - Time'] = pd.to_datetime(df['Arrival at Pickup - Time'], format='%I:%M:%S %p')
+    df['Pickup - Time'] = pd.to_datetime(df['Pickup - Time'], format='%I:%M:%S %p')
+
+    #Calculate intervals between all time columns. This format is the same as the given dependent variable, 'Time from Pickup to Arrival'
+    df['time_C-Pl'] = (df['Confirmation - Time'] - df['Placement - Time']).astype('timedelta64[s]').astype(np.int64)
+    df['time_AP-C'] = (df['Arrival at Pickup - Time'] - df['Confirmation - Time']).astype('timedelta64[s]').astype(np.int64)
+    df['time_P-AP'] = (df['Pickup - Time'] - df['Arrival at Pickup - Time']).astype('timedelta64[s]').astype(np.int64)
+
+    #Drop rows that has negative time intervals (eg. not possible for the confirmation to happen before the order is placed)
+    ls = [col for col in df if col.startswith('time')]
+    for i in range(len(ls)):
+        df = df.drop(df[df[ls[i]] <= 0].index)
+
+    model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP']
 
     df = df[model_features]
 
