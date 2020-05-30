@@ -49,6 +49,7 @@ def _preprocess_data(data):
     feature_vector_dict = json.loads(data)
     # Load the dictionary as a Pandas DataFrame.
     feature_vector_df = pd.DataFrame.from_dict([feature_vector_dict])
+    df = feature_vector_df
 
     # ---------------------------------------------------------------
     # NOTE: You will need to swap the lines below for your own data
@@ -57,13 +58,119 @@ def _preprocess_data(data):
     # The code below is for demonstration purposes only. You will not
     # receive marks for submitting this code in an unchanged state.
     # ---------------------------------------------------------------
+    train = pd.read_csv('data/Train.csv')
 
-    # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Pickup Lat','Pickup Long',
-                                        'Destination Lat','Destination Long']]
-    # ------------------------------------------------------------------------
+    #Categorical variables
+    df['User Id'] = pd.to_numeric(df['User Id'].str.split('User_Id_', n=1, expand = True)[1])
+    df = pd.get_dummies(df, columns=['Personal or Business'], drop_first=True)
+    df = pd.get_dummies(df, columns=['Platform Type'], drop_first=True)
 
-    return predict_vector
+
+
+    ##############################################################################
+    """
+    Copyright (C) 2008 Leonard Norrgard <leonard.norrgard@gmail.com>
+    Copyright (C) 2015 Leonard Norrgard <leonard.norrgard@gmail.com>
+
+    This file is part of Geohash.
+
+    Geohash is free software: you can redistribute it and/or modify it
+    under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Geohash is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
+    License for more details.
+
+    You should have received a copy of the GNU Affero General Public
+    License along with Geohash.  If not, see
+    <http://www.gnu.org/licenses/>.
+    """
+    from math import log10
+
+    #  Note: the alphabet in geohash differs from the common base32
+    #  alphabet described in IETF's RFC 4648
+    #  (http://tools.ietf.org/html/rfc4648)
+    __base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
+    __decodemap = { }
+    for i in range(len(__base32)):
+        __decodemap[__base32[i]] = i
+    del i
+
+    def encode(latitude, longitude, precision=12):
+        """
+        Encode a position given in float arguments latitude, longitude to
+        a geohash which will have the character count precision.
+        """
+        lat_interval, lon_interval = (-90.0, 90.0), (-180.0, 180.0)
+        geohash = []
+        bits = [ 16, 8, 4, 2, 1 ]
+        bit = 0
+        ch = 0
+        even = True
+        while len(geohash) < precision:
+            if even:
+                mid = (lon_interval[0] + lon_interval[1]) / 2
+                if longitude > mid:
+                    ch |= bits[bit]
+                    lon_interval = (mid, lon_interval[1])
+                else:
+                    lon_interval = (lon_interval[0], mid)
+            else:
+                mid = (lat_interval[0] + lat_interval[1]) / 2
+                if latitude > mid:
+                    ch |= bits[bit]
+                    lat_interval = (mid, lat_interval[1])
+                else:
+                    lat_interval = (lat_interval[0], mid)
+            even = not even
+            if bit < 4:
+                bit += 1
+            else:
+                geohash += __base32[ch]
+                bit = 0
+                ch = 0
+        return ''.join(geohash)
+    ##############################################################################
+
+
+
+    #Transform training data latitude and longitude into geohashes
+    geo_df = train.loc[:, ['Pickup Lat', 'Pickup Long', 'Destination Lat', 'Destination Long']]
+    geo_df['pickup'] = 0
+    geo_df['dest'] = 0
+    for i in range(len(geo_df)):
+        geo_df.iloc[i, 4] = encode(geo_df.iloc[i, 0], geo_df.iloc[i, 1], precision=6)
+        geo_df.iloc[i, 5] = encode(geo_df.iloc[i, 2], geo_df.iloc[i, 3], precision=6)
+
+    # Make a dictionary of geohash labels
+    labels = list(set(list(geo_df['pickup']) + list(geo_df['dest'])))
+    vals = [i + 1 for i in list(range(0, len(labels)))]
+    geohash_dict = dict(zip(labels, vals))
+
+    #Transform testing data latitude and longitude into geohashes
+    geo_df = df.loc[:, ['Pickup Lat', 'Pickup Long', 'Destination Lat', 'Destination Long']]
+    geo_df['pickup'] = 0
+    geo_df['dest'] = 0
+    for i in range(len(geo_df)):
+        geo_df.iloc[i, 4] = encode(geo_df.iloc[i, 0], geo_df.iloc[i, 1], precision=6)
+        geo_df.iloc[i, 5] = encode(geo_df.iloc[i, 2], geo_df.iloc[i, 3], precision=6)
+
+    #Transform geohash labels using the dictionary
+    geo_df['pickup_label'] = geo_df['pickup'].apply(lambda i: geohash_dict[i] if i in geohash_dict.keys() else 0)
+    geo_df['dest_label'] = geo_df['dest'].apply(lambda i: geohash_dict[i] if i in geohash_dict.keys() else 0)
+
+    #Add to df
+    df['pickup_geohash'] = geo_df['pickup_label']
+    df['dest_geohash'] = geo_df['dest_label']
+
+    model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'Personal or Business_Personal', 'Platform Type_2', 'Platform Type_3', 'Platform Type_4']
+
+    df = df[model_features]
+
+    return df
 
 def load_model(path_to_model:str):
     """Adapter function to load our pretrained model into memory.
