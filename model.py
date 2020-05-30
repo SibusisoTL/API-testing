@@ -210,8 +210,13 @@ def _preprocess_data(data):
     df['ranking'] = df['Average_Rating'] * df['No_of_Ratings'] / total
     df['deliveries_per_day'] = df['No_Of_Orders'] / df['Age']
 
+    #Temperature missing values
+    df['hour'] = df['Placement - Time'].apply(lambda x: x.hour)
+    df['Temperature'] = df['Temperature'].fillna(df.groupby('hour')['Temperature'].mean())
+
     model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)', 'pl', 'con', 'arr p', 'p',
-                    'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos', 'ranking', 'deliveries_per_day', 'pl_sin', 'con_sin', 'arr p_sin', 'p_sin', 'pl_cos', 'con_cos', 'arr p_cos', 'p_cos']
+                        'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos', 'ranking', 'deliveries_per_day', 'pl_sin', 'con_sin', 'arr p_sin', 'p_sin', 'pl_cos', 'con_cos', 'arr p_cos', 'p_cos', 'Temperature']
+
 
     df = df[model_features]
 
