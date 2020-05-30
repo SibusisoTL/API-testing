@@ -147,12 +147,12 @@ for i in range(len(ls)):
     df[ls[i]] = df[ls[i]].apply(lambda x: np.sin(x*(2.*np.pi/86400)))
 
 #sin/cos transform 'Weekday'
-df['weekday_sin'] = df['weekday'].apply(lambda x: np.sin(x*(2.*np.pi/7)))
-df['weekday_cos'] = df['weekday'].apply(lambda x: np.cos(x*(2.*np.pi/7)))
+df['weekday_sin'] = df['Pickup - Weekday (Mo = 1)'].apply(lambda x: np.sin(x*(2.*np.pi/7)))
+df['weekday_cos'] = df['Pickup - Weekday (Mo = 1)'].apply(lambda x: np.cos(x*(2.*np.pi/7)))
 
 #sin/cos transform 'Day of Month'
-df['day_month_sin'] = df['month_day']. apply(lambda x: np.sin(x*(2.*np.pi/31)))
-df['day_month_cos'] = df['month_day']. apply(lambda x: np.cos(x*(2.*np.pi/31)))
+df['day_month_sin'] = df['Pickup - Day of Month']. apply(lambda x: np.sin(x*(2.*np.pi/31)))
+df['day_month_cos'] = df['Pickup - Day of Month']. apply(lambda x: np.cos(x*(2.*np.pi/31)))
 
 model_features = ['User Id', 'dest_geohash', 'pickup_geohash', 'time_C-Pl', 'time_AP-C', 'time_P-AP', 'Distance (KM)', 'Pickup - Day of Month', 'Pickup - Weekday (Mo = 1)', 'pl', 'con', 'arr p', 'p'
                     'weekday_sin', 'weekday_cos', 'day_month_sin', 'day_month_cos']
